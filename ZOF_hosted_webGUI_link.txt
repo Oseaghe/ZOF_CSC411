@@ -1,0 +1,27 @@
+=====================================
+ZERO OF FUNCTIONS (ZOF) SOLVER
+Web GUI Deployment Information
+=====================================
+
+Name: [Your Full Name]
+
+Matric Number: [Your Matric Number]
+
+Live Application URL: 
+[Your deployed application URL - e.g., https://zof-solver.onrender.com]
+
+GitHub Repository: 
+[Your GitHub repository URL - e.g., https://github.com/yourusername/ZOF_Project]
+
+Deployment Platform: 
+[e.g., Render.com / PythonAnywhere / Streamlit Cloud]
+
+Deployment Date: 
+[Date of deployment]
+
+=====================================
+NOTES:
+- Ensure the live URL is accessible
+- GitHub repository should be public
+- All required files included in repository
+=====================================
