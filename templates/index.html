@@ -1,304 +1,583 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zero of Functions Solver</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero of Functions Solver</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<!-- Math.js for parsing math expressions -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.9.0/math.min.js"></script>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    padding: 20px;
-}
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    overflow: hidden;
-}
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
 
-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 30px;
-    text-align: center;
-}
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
 
-header h1 { font-size: 2.5em; margin-bottom: 10px; }
-header p { font-size: 1.1em; opacity: 0.9; }
+        .content {
+            padding: 30px;
+        }
 
-.content { padding: 30px; }
-.method-selector { margin-bottom: 30px; }
+        .method-selector {
+            margin-bottom: 30px;
+        }
 
-.method-selector label {
-    display: block;
-    font-size: 1.1em;
-    font-weight: 600;
-    margin-bottom: 10px;
-    color: #333;
-}
+        .method-selector label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
 
-.method-selector select {
-    width: 100%;
-    padding: 12px;
-    font-size: 1em;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    background: white;
-    cursor: pointer;
-    transition: border-color 0.3s;
-}
+        .method-selector select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
 
-.method-selector select:focus {
-    outline: none;
-    border-color: #667eea;
-}
+        .method-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
 
-.input-section {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
+        .input-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
 
-.form-group { margin-bottom: 20px; }
-.form-group label { font-weight: 600; margin-bottom: 8px; color: #555; display: block; }
-.form-group input {
-    width: 100%;
-    padding: 10px;
-    font-size: 1em;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    transition: border-color 0.3s;
-}
-.form-group input:focus { outline: none; border-color: #667eea; }
-.form-group small { display: block; margin-top: 5px; color: #888; font-style: italic; }
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-.input-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-}
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
 
-.btn-solve {
-    width: 100%;
-    padding: 15px;
-    font-size: 1.2em;
-    font-weight: 600;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            transition: border-color 0.3s;
+        }
 
-.btn-solve:disabled { background: #ccc; cursor: not-allowed; }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
 
-.results { margin-top: 30px; display: none; }
-.results.show { display: block; }
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #888;
+            font-style: italic;
+        }
 
-.result-summary {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
 
-.result-summary.error {
-    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-}
+        .btn-solve {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
 
-.result-summary h3 { font-size: 1.5em; margin-bottom: 15px; }
-.result-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .btn-solve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
 
-.iterations-table {
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
+        .btn-solve:active {
+            transform: translateY(0);
+        }
 
-.iterations-table h3 {
-    background: #667eea;
-    color: white;
-    margin: 0;
-    padding: 15px 20px;
-}
+        .btn-solve:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
 
-.table-container { overflow-x: auto; max-height: 500px; }
-table { width: 100%; border-collapse: collapse; }
-th, td { text-align: center; padding: 10px; }
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
 
-.loading { display: none; text-align: center; padding: 20px; }
-.loading.show { display: block; }
+        .results.show {
+            display: block;
+        }
 
-.spinner {
-    width: 50px; height: 50px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 15px;
-}
+        .result-summary {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
 
-@keyframes spin { 100% { transform: rotate(360deg); } }
+        .result-summary.error {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
 
-.method-info {
-    background: #e3f2fd;
-    border-left: 4px solid #2196f3;
-    padding: 15px;
-    border-radius: 5px;
-}
+        .result-summary h3 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
 
-@media (max-width: 768px) {
-    header h1 { font-size: 1.8em; }
-    .content { padding: 15px; }
-    .input-grid { grid-template-columns: 1fr; }
-}
-</style>
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-item label {
+            font-weight: 600;
+        }
+
+        .iterations-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .iterations-table h3 {
+            background: #667eea;
+            color: white;
+            padding: 15px 20px;
+            margin: 0;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table thead {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        table th {
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+        }
+
+        table td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .method-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+
+        .method-info h4 {
+            color: #1976d2;
+            margin-bottom: 8px;
+        }
+
+        .method-info p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-
 <body>
-<div class="container">
-    <header>
-        <h1>🔢 Zero of Functions Solver</h1>
-        <p>Numerical Methods for Root Finding</p>
-    </header>
+    <div class="container">
+        <header>
+            <h1>🔢 Zero of Functions Solver</h1>
+            <p>Numerical Methods for Root Finding</p>
+        </header>
 
-    <div class="content">
-        <div class="method-selector">
-            <label>Select Numerical Method:</label>
-            <select id="method" onchange="updateInputFields()">
-                <option value="">-- Choose a Method --</option>
-                <option value="bisection">Bisection</option>
-                <option value="regula_falsi">Regula Falsi</option>
-                <option value="secant">Secant</option>
-                <option value="newton_raphson">Newton-Raphson</option>
-                <option value="fixed_point">Fixed Point</option>
-                <option value="modified_secant">Modified Secant</option>
-            </select>
-        </div>
-
-        <div id="methodInfo" class="method-info" style="display: none;"></div>
-
-        <div class="input-section">
-            <div class="form-group">
-                <label>Function f(x):</label>
-                <input type="text" id="function" placeholder="e.g., x^3 - x - 2">
-                <small id="functionHint">
-                    Enter function in plain math format: use x as variable, ^ for powers, e.g., x^3 - x - 2, sin(x), log(x)
-                </small>
+        <div class="content">
+            <div class="method-selector">
+                <label for="method">Select Numerical Method:</label>
+                <select id="method" onchange="updateInputFields()">
+                    <option value="">-- Choose a Method --</option>
+                    <option value="bisection">Bisection Method</option>
+                    <option value="regula_falsi">Regula Falsi (False Position)</option>
+                    <option value="secant">Secant Method</option>
+                    <option value="newton_raphson">Newton-Raphson Method</option>
+                    <option value="fixed_point">Fixed Point Iteration</option>
+                    <option value="modified_secant">Modified Secant Method</option>
+                </select>
             </div>
 
-            <div id="dynamicInputs"></div>
+            <div id="methodInfo" class="method-info" style="display: none;"></div>
 
-            <div class="input-grid">
+            <div class="input-section">
                 <div class="form-group">
-                    <label>Tolerance:</label>
-                    <input type="text" id="tolerance" value="0.000001">
+                    <label for="function">Function f(x):</label>
+                    <input type="text" id="function" placeholder="e.g., x**3 - x - 2">
+                    <small id="functionHint">Enter function using Python syntax (**, *, +, -, /, sin, cos, exp, log, sqrt)</small>
                 </div>
-                <div class="form-group">
-                    <label>Max Iterations:</label>
-                    <input type="number" id="max_iterations" value="100">
+
+                <div id="dynamicInputs"></div>
+
+                <div class="input-grid">
+                    <div class="form-group">
+                        <label for="tolerance">Tolerance:</label>
+                        <input type="text" id="tolerance" value="0.000001">
+                    </div>
+                    <div class="form-group">
+                        <label for="max_iterations">Max Iterations:</label>
+                        <input type="number" id="max_iterations" value="100">
+                    </div>
                 </div>
+
+                <button class="btn-solve" onclick="solveEquation()" id="solveBtn" disabled>
+                    Solve Equation
+                </button>
             </div>
 
-            <button class="btn-solve" onclick="solveEquation()" id="solveBtn" disabled>Solve Equation</button>
-        </div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Computing solution...</p>
+            </div>
 
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
-            <p>Computing solution...</p>
+            <div class="results" id="results"></div>
         </div>
-
-        <div id="results" class="results"></div>
     </div>
-</div>
 
-<script>
-const methodInfoData = {
-    bisection: {inputs: ['a','b'], info: 'Bisection uses interval halving.'},
-    regula_falsi: {inputs: ['a','b'], info: 'False position uses linear interpolation.'},
-    secant: {inputs: ['x0','x1'], info: 'Secant uses two initial guesses.'},
-    newton_raphson: {inputs: ['x0'], info: 'Newton-Raphson uses derivative estimation.'},
-    fixed_point: {inputs: ['x0'], info: 'Fixed point iteration: x = g(x)'},
-    modified_secant: {inputs: ['x0','delta'], info: 'Modified secant approximates derivative numerically.'}
-};
+    <script>
+        const methodInfo = {
+            bisection: {
+                inputs: ['a', 'b'],
+                info: 'Bisection method finds roots by repeatedly bisecting an interval and selecting subintervals where the function changes sign. Requires initial bounds [a, b] where f(a) and f(b) have opposite signs.'
+            },
+            regula_falsi: {
+                inputs: ['a', 'b'],
+                info: 'Regula Falsi (False Position) improves upon bisection by using linear interpolation. Requires initial bounds [a, b] where f(a) and f(b) have opposite signs.'
+            },
+            secant: {
+                inputs: ['x0', 'x1'],
+                info: 'Secant method uses two initial points to approximate the derivative. Generally faster than bisection but may not always converge.'
+            },
+            newton_raphson: {
+                inputs: ['x0'],
+                info: 'Newton-Raphson uses the derivative to find roots quickly. Requires only one initial guess. Automatically computes f\'(x).'
+            },
+            fixed_point: {
+                inputs: ['x0'],
+                info: 'Fixed Point Iteration solves x = g(x). Enter g(x) as the function. For f(x) = 0, rearrange to x = g(x) form. Example: x³ - x - 2 = 0 becomes g(x) = (x + 2)^(1/3)',
+                functionHint: 'Enter g(x) such that x = g(x). Example: (x + 2)**(1/3)'
+            },
+            modified_secant: {
+                inputs: ['x0', 'delta'],
+                info: 'Modified Secant approximates the derivative using a perturbation. Delta is typically 0.01. Only requires one initial point.'
+            }
+        };
 
-const inputLabels = {a:'Lower Bound (a)',b:'Upper Bound (b)',x0:'Initial Guess (x₀)',x1:'Second Guess (x₁)',delta:'Delta (δ)'};
-const inputPlaceholders = {a:'0',b:'2',x0:'1.5',x1:'2.0',delta:'0.01'};
+        const inputLabels = {
+            a: 'Lower Bound (a)',
+            b: 'Upper Bound (b)',
+            x0: 'Initial Guess (x₀)',
+            x1: 'Second Guess (x₁)',
+            delta: 'Delta (δ)'
+        };
 
-function updateInputFields() {
-    const method = document.getElementById('method').value;
-    const dynamicInputs = document.getElementById('dynamicInputs');
-    const solveBtn = document.getElementById('solveBtn');
-    const methodInfoDiv = document.getElementById('methodInfo');
-    if(!method){ dynamicInputs.innerHTML=''; solveBtn.disabled=true; methodInfoDiv.style.display='none'; return;}
-    solveBtn.disabled=false;
-    const info = methodInfoData[method];
-    methodInfoDiv.innerHTML=`<h4>About This Method</h4><p>${info.info}</p>`;
-    methodInfoDiv.style.display='block';
-    let html='<div class="input-grid">';
-    info.inputs.forEach(input=>{
-        html+=`<div class="form-group"><label>${inputLabels[input]}:</label><input type="text" id="${input}" placeholder="${inputPlaceholders[input]}"></div>`;
-    });
-    html+='</div>'; dynamicInputs.innerHTML=html;
-    document.getElementById('results').classList.remove('show');
-}
+        const inputPlaceholders = {
+            a: 'e.g., 0',
+            b: 'e.g., 2',
+            x0: 'e.g., 1.5',
+            x1: 'e.g., 2.0',
+            delta: 'e.g., 0.01'
+        };
 
-// parse plain math string using math.js
-function parseFunction(funcStr){
-    try{return math.parse(funcStr).compile();}
-    catch(err){alert('Invalid function format. Example: x^3 - x - 2, sin(x), log(x)'); throw err;}
-}
+        function updateInputFields() {
+            const method = document.getElementById('method').value;
+            const dynamicInputs = document.getElementById('dynamicInputs');
+            const solveBtn = document.getElementById('solveBtn');
+            const methodInfoDiv = document.getElementById('methodInfo');
+            const functionHint = document.getElementById('functionHint');
 
-async function solveEquation(){
-    const method = document.getElementById('method').value;
-    const funcStr = document.getElementById('function').value;
-    if(!method||!funcStr){alert('Select method and enter function'); return;}
-    const data={method,func:funcStr,tolerance:document.getElementById('tolerance').value,max_iterations:document.getElementById('max_iterations').value};
-    methodInfoData[method].inputs.forEach(input=>{data[input]=document.getElementById(input).value;});
-    document.getElementById('loading').classList.add('show');
-    document.getElementById('results').classList.remove('show');
+            if (!method) {
+                dynamicInputs.innerHTML = '';
+                solveBtn.disabled = true;
+                methodInfoDiv.style.display = 'none';
+                return;
+            }
 
-    try{
-        const response = await fetch('/solve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-        const result = await response.json();
-        displayResults(result);
-    }catch(err){displayResults({error:'Connection error: '+err.message});}
-    document.getElementById('loading').classList.remove('show');
-}
+            solveBtn.disabled = false;
+            
+            // Show method info
+            const info = methodInfo[method];
+            methodInfoDiv.innerHTML = `<h4>About This Method</h4><p>${info.info}</p>`;
+            methodInfoDiv.style.display = 'block';
 
-function displayResults(result){
-    const resultsDiv = document.getElementById('results');
-    if(result.error){resultsDiv.innerHTML=`<div class="result-summary error"><h3>Error</h3><p>${result.error}</p></div>`; resultsDiv.classList.add('show'); return;}
-    let summaryHtml=`<div class="result-summary"><h3>Solution Found</h3><div class="result-item"><label>Root:</label><span>${result.root}</span></div><div class="result-item"><label>Final Error:</label><span>${result.final_error}</span></div><div class="result-item"><label>Iterations:</label><span>${result.iterations.length}</span></div></div>`;
-    let tableHtml='';
-    if(result.iterations && result.iterations.length>0){
-        const headers=Object.keys(result.iterations[0]);
-        tableHtml=`<div class="iterations-table"><h3>Iteration Details</h3><div class="table-container"><table><thead><tr>`;
-        headers.forEach(h=>tableHtml+=`<th>${h}</th>`);
-        tableHtml+='</tr></thead><tbody>';
-        result.iterations.forEach(iter=>{tableHtml+='<tr>'; headers.forEach(h=>tableHtml+=`<td>${iter[h]}</td>`); tableHtml+='</tr>';});
-        tableHtml+='</tbody></table></div></div>';
-    }
-    resultsDiv.innerHTML=summaryHtml+tableHtml;
-    resultsDiv.classList.add('show');
-}
+            // Update function hint
+            functionHint.textContent = info.functionHint || 'Enter function using Python syntax (**, *, +, -, /, sin, cos, exp, log, sqrt)';
 
-document.getElementById('method').addEventListener('change',()=>{document.getElementById('solveBtn').disabled=!document.getElementById('method').value;});
-</script>
+            // Generate input fields
+            let html = '<div class="input-grid">';
+            info.inputs.forEach(input => {
+                html += `
+                    <div class="form-group">
+                        <label for="${input}">${inputLabels[input]}:</label>
+                        <input type="text" id="${input}" placeholder="${inputPlaceholders[input]}" value="${input === 'delta' ? '0.01' : ''}">
+                    </div>
+                `;
+            });
+            html += '</div>';
+            dynamicInputs.innerHTML = html;
 
+            // Clear previous results
+            document.getElementById('results').classList.remove('show');
+        }
+
+        async function solveEquation() {
+            const method = document.getElementById('method').value;
+            const func = document.getElementById('function').value;
+            const tolerance = document.getElementById('tolerance').value;
+            const maxIterations = document.getElementById('max_iterations').value;
+
+            if (!method || !func) {
+                alert('Please select a method and enter a function');
+                return;
+            }
+
+            const data = {
+                method: method,
+                function: func,
+                tolerance: tolerance,
+                max_iterations: maxIterations
+            };
+
+            // Add method-specific parameters
+            const info = methodInfo[method];
+            info.inputs.forEach(input => {
+                const value = document.getElementById(input).value;
+                if (!value && input !== 'delta') {
+                    alert(`Please enter ${inputLabels[input]}`);
+                    throw new Error('Missing input');
+                }
+                data[input] = value;
+            });
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('solveBtn').disabled = true;
+
+            try {
+                const response = await fetch('/solve', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                displayResults(result);
+            } catch (error) {
+                displayResults({error: 'Failed to connect to server: ' + error.message});
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('solveBtn').disabled = false;
+            }
+        }
+
+        function displayResults(result) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (result.error) {
+                resultsDiv.innerHTML = `
+                    <div class="result-summary error">
+                        <h3>❌ Error</h3>
+                        <p>${result.error}</p>
+                    </div>
+                `;
+                resultsDiv.classList.add('show');
+                return;
+            }
+
+            let summaryHtml = `
+                <div class="result-summary">
+                    <h3>✅ Solution Found</h3>
+                    <div class="result-item">
+                        <label>Root:</label>
+                        <span>${result.root}</span>
+                    </div>
+                    <div class="result-item">
+                        <label>Final Error:</label>
+                        <span>${result.final_error.toExponential(6)}</span>
+                    </div>
+                    <div class="result-item">
+                        <label>Iterations:</label>
+                        <span>${result.iterations.length}</span>
+                    </div>
+                    <div class="result-item">
+                        <label>Converged:</label>
+                        <span>${result.converged ? '✓ Yes' : '✗ No'}</span>
+                    </div>
+                    ${result.message ? `<div class="result-item"><label>Note:</label><span>${result.message}</span></div>` : ''}
+                </div>
+            `;
+
+            // Build iterations table
+            if (result.iterations && result.iterations.length > 0) {
+                const headers = Object.keys(result.iterations[0]);
+                
+                let tableHtml = `
+                    <div class="iterations-table">
+                        <h3>Iteration Details</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        ${headers.map(h => `<th>${h}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+
+                result.iterations.forEach(iter => {
+                    tableHtml += '<tr>';
+                    headers.forEach(header => {
+                        const value = iter[header];
+                        const displayValue = typeof value === 'number' ? 
+                            (Math.abs(value) < 0.0001 || Math.abs(value) > 1000 ? 
+                                value.toExponential(6) : value.toFixed(8)) : value;
+                        tableHtml += `<td>${displayValue}</td>`;
+                    });
+                    tableHtml += '</tr>';
+                });
+
+                tableHtml += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                resultsDiv.innerHTML = summaryHtml + tableHtml;
+            } else {
+                resultsDiv.innerHTML = summaryHtml;
+            }
+
+            resultsDiv.classList.add('show');
+        }
+
+        // Enable solve button when method is selected
+        document.getElementById('method').addEventListener('change', function() {
+            document.getElementById('solveBtn').disabled = !this.value;
+        });
+    </script>
 </body>
 </html>
